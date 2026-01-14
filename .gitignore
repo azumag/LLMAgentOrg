@@ -23,3 +23,6 @@ logs/
 # Temporary files
 tmp/
 temp/
+
+# Workflow runs (generated)
+runs/

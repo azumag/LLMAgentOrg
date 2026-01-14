@@ -1,175 +1,82 @@
 # LLMAgentOrg
 
-LLMが協調して動作する組織の実験的プロジェクト。
-
-複数のLLM（Gemini、Claude、ローカルLLM）に役割を割り当て、プロダクトのコーディングとシステム開発を協調して行う。
+複数のLLM（Claude, Gemini, LFM）を役割分担させて協調動作させるマルチエージェントシステム。
 
 ## コンセプト
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                        User                             │
-│                    （要件入力）                          │
-└─────────────────────┬───────────────────────────────────┘
-                      │
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│                    PM (Gemini)                          │
-│              要件分析・タスク分解                         │
-└─────────────────────┬───────────────────────────────────┘
-                      │
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│               Architect (Claude)                        │
-│            システム設計・技術選定                         │
-└─────────────────────┬───────────────────────────────────┘
-                      │
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│              Implementer (LFM)                          │
-│                 コード実装                               │
-└─────────────────────┬───────────────────────────────────┘
-                      │
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│               Reviewer (Claude)                         │
-│                コードレビュー                            │
-└─────────────────────┬───────────────────────────────────┘
-                      │
-                      ▼
-┌─────────────────────────────────────────────────────────┐
-│                  QA (Gemini)                            │
-│         結合テスト・E2Eテスト・リリース判定               │
-└─────────────────────┴───────────────────────────────────┘
-```
+Opus -> LFM -> テスト -> レビュー の自動化ワークフロー：
 
-## 役割（Roles）
+- **Opus (Claude)**: 設計書 + テストケース定義（高い推論能力を活用）
+- **LFM (ローカルLLM)**: コード生成（何度でも再生成OK、無料）
+- **テスト実行**: ローカルで自動実行
+- **レビュー**: Opus/Gemini で最終確認
 
-| 役割 | 説明 | 設定ファイル |
-|-----|------|-------------|
-| PM | 要件分析、タスク分解、進捗管理 | `config/roles/pm.yaml` |
-| Architect | システム設計、技術選定 | `config/roles/architect.yaml` |
-| Implementer | コード実装 | `config/roles/implementer.yaml` |
-| Reviewer | コードレビュー | `config/roles/reviewer.yaml` |
-| QA | 結合テスト、E2Eテスト、リリース判定 | `config/roles/qa.yaml` |
+### なぜこの構成か
 
-## 利用可能なLLM
-
-| LLM | プロバイダー | 呼び出し方式 | 必要なサブスク | 設定ファイル |
-|-----|------------|-------------|--------------|-------------|
-| Gemini | Google | gemini-cli | Google One AI Premium | `config/llms/gemini.yaml` |
-| Claude | Anthropic | claude-code | Claude Pro/Max | `config/llms/claude.yaml` |
-| LFM | Liquid AI | llama.cpp (ローカル) | なし（無料） | `config/llms/lfm.yaml` |
-
-### ローカルLLM（LFM）について
-
-このプロジェクトでは、ローカルLLMとして [Liquid Foundation Models (LFM)](https://www.liquid.ai/blog/liquid-foundation-models-v2-our-second-series-of-generative-ai-models) を使用しています。
-
-- **HuggingFace**: https://huggingface.co/collections/LiquidAI/lfm25
-- **実行エンジン**: [llama.cpp](https://github.com/ggml-org/llama.cpp)
-- **モデル**: LFM2.5-1.2B-Instruct（英語版）/ LFM2.5-1.2B-JP-Instruct（日本語版）
+| LLM | 特徴 | 適した役割 |
+|-----|------|-----------|
+| Claude (Opus) | 高い推論能力、正確なコード生成 | 設計、レビュー、QA |
+| Gemini | 大規模コンテキスト、高速 | PM、要件分析、ドキュメント |
+| LFM | 無料、ローカル実行、高速 | コード実装（何度でも再生成可能） |
 
 ## ディレクトリ構成
 
 ```
 LLMAgentOrg/
+├── CLAUDE.md              # Claude Code利用ガイドライン
+├── README.md              # このファイル
 ├── config/
-│   ├── roles/          # 役割定義
-│   │   ├── pm.yaml
-│   │   ├── architect.yaml
-│   │   ├── implementer.yaml
-│   │   ├── reviewer.yaml
-│   │   └── qa.yaml
-│   └── llms/           # LLM定義
-│       ├── gemini.yaml
-│       ├── claude.yaml
-│       └── lfm.yaml
-├── projects/           # プロジェクト設定
-│   └── example/
-│       ├── project.yaml      # 役割とLLMの割り当て
-│       └── project-alt.yaml  # 代替構成（比較用）
-├── local-llm/          # ローカルLLM（シンボリックリンク）
-│   ├── build -> llama.cpp/build
-│   └── models -> llama.cpp/models
-└── README.md
+│   ├── llms/              # LLM設定
+│   │   ├── claude.yaml    # Claude (Anthropic) 設定
+│   │   ├── gemini.yaml    # Gemini (Google) 設定
+│   │   └── lfm.yaml       # LFM (Liquid AI) 設定
+│   └── roles/             # 役割定義
+│       ├── pm.yaml        # プロジェクトマネージャー
+│       ├── architect.yaml # アーキテクト
+│       ├── implementer.yaml # 実装者
+│       ├── reviewer.yaml  # レビュアー
+│       └── qa.yaml        # QAエンジニア
+├── projects/
+│   └── example/           # サンプルプロジェクト構成
+│       ├── project.yaml           # 基本構成
+│       ├── project-alt.yaml       # 代替構成（比較用）
+│       ├── project-lfm-pm.yaml    # LFM PM構成
+│       └── project-lfm-architect.yaml # LFM Architect構成
+├── workflow/
+│   ├── config.yaml        # ワークフロー設定
+│   ├── bin/
+│   │   ├── run-workflow.sh   # ワークフロー実行スクリプト
+│   │   └── invoke-llm.sh     # LLM呼び出しスクリプト
+│   ├── lib/
+│   │   ├── __init__.py
+│   │   ├── llm_client.py     # Python LLMクライアント
+│   │   └── state_manager.py  # 状態管理モジュール
+│   └── templates/
+│       ├── design_spec.md    # 設計フェーズ用テンプレート
+│       ├── implementation.md # 実装フェーズ用テンプレート
+│       └── fix_error.md      # エラー修正用テンプレート
+├── tasks/                 # タスク定義（要件）
+│   └── {task-id}/
+│       └── requirement.md
+└── runs/                  # 実行結果出力先
+    └── {task-id}/
+        ├── state.json
+        ├── design_spec.md
+        └── implementation/
 ```
 
 ## セットアップ
 
-### 1. リポジトリのクローン
+### 前提条件
 
-```bash
-git clone https://github.com/your-org/LLMAgentOrg.git
-cd LLMAgentOrg
-```
+- macOS (Apple Silicon推奨)
+- Python 3.9+
+- jq (JSONパーサー)
+- Claude CLI (`claude` コマンド) - Claude Pro/Max サブスク
+- Gemini CLI (`gemini` コマンド) - Google One AI Premium サブスク
+- llama.cpp (LFM実行用)
 
-### 2. ローカルLLM（llama.cpp + LFM）のセットアップ
-
-#### 2.1 llama.cpp のビルド
-
-```bash
-# llama.cpp をクローン
-cd ~/work  # または任意のディレクトリ
-git clone https://github.com/ggml-org/llama.cpp.git
-cd llama.cpp
-
-# ビルド（Apple Silicon Mac の場合）
-cmake -B build -DGGML_METAL=ON
-cmake --build build --config Release -j
-```
-
-#### 2.2 LFM モデルのダウンロード
-
-```bash
-cd llama.cpp/models
-
-# Hugging Face CLI でダウンロード（推奨: Q4_K_M量子化版）
-huggingface-cli download LiquidAI/LFM2.5-1.2B-Instruct-GGUF \
-  LFM2.5-1.2B-Instruct-Q4_K_M.gguf \
-  --local-dir .
-
-# 日本語版が必要な場合
-huggingface-cli download LiquidAI/LFM2.5-1.2B-JP-GGUF \
-  LFM2.5-1.2B-JP-Instruct-Q4_K_M.gguf \
-  --local-dir .
-```
-
-#### 2.3 シンボリックリンクの作成
-
-```bash
-cd /path/to/LLMAgentOrg
-mkdir -p local-llm
-ln -s /path/to/llama.cpp/build local-llm/build
-ln -s /path/to/llama.cpp/models local-llm/models
-```
-
-### 3. 動作確認
-
-```bash
-# インタラクティブモード
-./local-llm/build/bin/llama-cli -m ./local-llm/models/LFM2.5-1.2B-Instruct-Q4_K_M.gguf
-
-# サーバーモード（API）
-./local-llm/build/bin/llama-server -m ./local-llm/models/LFM2.5-1.2B-Instruct-Q4_K_M.gguf --port 8080
-```
-
-**参考パフォーマンス（Apple M4）**:
-- Prompt評価: 156 tokens/s
-- 生成: 117 tokens/s
-
-### 4. Gemini CLI のセットアップ
-
-```bash
-# インストール
-npm install -g @google/gemini-cli
-
-# 認証（Googleアカウントでログイン）
-gemini auth login
-```
-
-**必要**: Google One AI Premium サブスクリプション
-
-### 5. Claude Code CLI のセットアップ
+### Claude CLIのセットアップ
 
 ```bash
 # インストール
@@ -177,100 +84,306 @@ npm install -g @anthropic-ai/claude-code
 
 # 認証（Anthropicアカウントでログイン）
 claude auth login
+
+# 必要: Claude Pro または Claude Max サブスクリプション
 ```
 
-**必要**: Claude Pro または Claude Max サブスクリプション
+### Gemini CLIのセットアップ
 
-## プロジェクト設定の作成
+```bash
+# インストール
+npm install -g @google/gemini-cli
 
-新しいプロジェクトを作成する場合は、`projects/` 以下にディレクトリを作成し、`project.yaml` を配置します。
+# 認証（Googleアカウントでログイン）
+gemini auth login
+
+# 必要: Google One AI Premium サブスクリプション
+```
+
+### LFM (llama.cpp) のセットアップ
+
+```bash
+# 1. llama.cppをクローンしてビルド
+git clone https://github.com/ggml-org/llama.cpp.git local-llm
+cd local-llm
+cmake -B build
+cmake --build build --config Release
+
+# 2. モデルをダウンロード (Hugging Face CLIを使用)
+# まずHugging Face CLIをインストール
+pip install huggingface-hub
+
+# モデルダウンロード（GGUF形式を選択）
+huggingface-cli download LiquidAI/LFM2.5-1.2B-Instruct-GGUF \
+  LFM2.5-1.2B-Instruct-Q4_K_M.gguf \
+  --local-dir ./models
+
+# 3. サーバーを起動
+./build/bin/llama-server -m ./models/LFM2.5-1.2B-Instruct-Q4_K_M.gguf --port 8080
+```
+
+利用可能なLFMモデル：
+- `LFM2.5-1.2B-Instruct` - 英語版（推奨）
+- `LFM2.5-1.2B-JP-Instruct` - 日本語版
+- `LFM2.5-3B-Instruct` - 大きいモデル
+
+量子化オプション：
+- `Q4_K_M` - 推奨（バランス良い）
+- `Q8_0` - 高精度
+- `F16` - フル精度
+
+## 使い方
+
+### ワークフロー実行
+
+```bash
+# 基本的な使い方
+./workflow/bin/run-workflow.sh <task-id>
+
+# 例: test-001 タスクを実行
+./workflow/bin/run-workflow.sh test-001
+
+# 設計フェーズをスキップ（既存の設計仕様を使用）
+./workflow/bin/run-workflow.sh test-001 --skip-design
+```
+
+#### ワークフローの流れ
+
+1. **Phase 0: 初期化**
+   - タスクディレクトリ作成
+   - state.json 初期化
+
+2. **Phase 1: 設計 (Claude)**
+   - `tasks/{task-id}/requirement.md` を読み込み
+   - Claude に設計仕様書を生成させる
+   - 出力: `runs/{task-id}/design_spec.md`
+
+3. **Phase 2: 実装 (LFM)**
+   - 設計仕様書を読み込み
+   - LFM にコードを生成させる
+   - 出力: `runs/{task-id}/implementation/attempt_1/output.md`
+
+4. **Phase 3: 完了**
+   - 状態を COMPLETED に更新
+
+### 個別LLM呼び出し
+
+```bash
+# Claude を呼び出し
+./workflow/bin/invoke-llm.sh claude prompt.txt output.txt
+
+# Gemini を呼び出し
+./workflow/bin/invoke-llm.sh gemini prompt.txt output.txt
+
+# LFM を呼び出し（llama-serverが起動している必要あり）
+./workflow/bin/invoke-llm.sh lfm prompt.txt output.txt
+
+# タイムアウトを指定（デフォルト: 300秒）
+./workflow/bin/invoke-llm.sh claude prompt.txt output.txt --timeout=600
+```
+
+### Pythonからの利用
+
+```python
+from workflow.lib.llm_client import LLMClient, create_claude_client, create_lfm_client
+
+# Claude クライアント
+claude = create_claude_client()
+response = claude.invoke("Hello, world!")
+
+# システムプロンプト付き
+response = claude.invoke(
+    "Explain AI",
+    system="You are a teacher"
+)
+
+# LFM クライアント（カスタム設定）
+lfm = LLMClient("lfm", config={
+    "url": "http://localhost:8080/v1/chat/completions",
+    "temperature": 0.5,
+    "max_tokens": 2048
+})
+response = lfm.invoke("Write a simple function")
+
+# ファイルをコンテキストとして渡す
+from pathlib import Path
+response = claude.invoke_with_files(
+    "Review this code",
+    [Path("src/main.py"), Path("tests/test_main.py")]
+)
+```
+
+## 設定
+
+### LLM設定 (config/llms/)
+
+#### Claude (claude.yaml)
+```yaml
+llm: claude
+models:
+  - claude-opus-4-5
+  - claude-sonnet-4
+  - claude-haiku-3-5
+default_model: claude-sonnet-4
+invocation:
+  type: cli
+  cli: claude
+```
+
+#### Gemini (gemini.yaml)
+```yaml
+llm: gemini
+models:
+  - gemini-2.5-pro
+  - gemini-2.5-flash
+default_model: gemini-2.5-pro
+invocation:
+  type: cli
+  cli: gemini
+```
+
+#### LFM (lfm.yaml)
+```yaml
+llm: lfm
+models:
+  - LFM2.5-1.2B-Instruct
+  - LFM2.5-1.2B-JP-Instruct
+  - LFM2.5-3B-Instruct
+runtime:
+  engine: llama.cpp
+invocation:
+  server: ./local-llm/build/bin/llama-server -m ./local-llm/models/LFM2.5-1.2B-Instruct-Q4_K_M.gguf --port 8080
+  api_endpoint: http://localhost:8080/v1/chat/completions
+performance:
+  prompt_eval: "156 t/s"  # Apple M4での参考値
+  generation: "117 t/s"
+```
+
+### 役割定義 (config/roles/)
+
+| 役割 | 説明 | 主な責務 |
+|-----|------|---------|
+| **PM** | プロジェクトマネージャー | 要件定義、タスク分解、優先順位付け |
+| **Architect** | システムアーキテクト | システム設計、技術選定、設計ドキュメント作成 |
+| **Implementer** | 実装者 | コード実装、ユニットテスト作成 |
+| **Reviewer** | レビュアー | コードレビュー、品質チェック、改善提案 |
+| **QA** | QAエンジニア | 結合/E2Eテスト、受入テスト、リリース判定 |
+
+### プロジェクト構成 (projects/)
+
+役割とLLMの割り当てパターンを定義：
+
+#### 基本構成 (project.yaml)
+```yaml
+role_assignments:
+  pm: gemini           # Gemini が PM
+  architect: claude    # Claude がアーキテクト
+  implementer: lfm     # LFM が実装
+  reviewer: claude     # Claude がレビュー
+  qa: gemini           # Gemini が QA
+```
+
+#### 代替構成 (project-alt.yaml)
+```yaml
+role_assignments:
+  pm: claude           # Claude が PM
+  architect: gemini    # Gemini がアーキテクト
+  implementer: lfm     # LFM が実装
+  reviewer: gemini     # Gemini がレビュー
+  qa: claude           # Claude が QA
+```
+
+## ワークフロー詳細
+
+### 状態遷移
+
+```
+INIT -> DESIGNING -> DESIGNED -> IMPLEMENTING -> TESTING -> REVIEWING -> COMPLETED
+                          |            |             |           |
+                          |            v             v           v
+                          |        RETRYING -> ESCALATING -> FAILED
+                          |            ^
+                          |            |
+                          +------------+
+```
+
+| 状態 | 説明 |
+|-----|------|
+| `INIT` | 初期状態 |
+| `DESIGNING` | 設計フェーズ実行中 |
+| `DESIGNED` | 設計完了 |
+| `IMPLEMENTING` | 実装フェーズ実行中 |
+| `TESTING` | テスト実行中 |
+| `RETRYING` | エラー修正のため再試行中 |
+| `ESCALATING` | 複雑なエラーのためエスカレーション中 |
+| `REVIEWING` | レビュー実行中 |
+| `COMPLETED` | 正常完了 |
+| `FAILED` | 失敗（最大リトライ回数超過） |
+
+### テンプレート (workflow/templates/)
+
+#### design_spec.md
+設計フェーズで使用。要件から設計仕様書を生成：
+- 機能概要
+- データ構造
+- API/インターフェース仕様
+- ファイル構成
+- 実装詳細
+- テストケース
+
+#### implementation.md
+実装フェーズで使用。設計仕様からコードを生成：
+- 設計仕様に忠実な実装
+- テストケースをパスする実装
+- 適切なエラーハンドリング
+- コメント付きコード
+
+#### fix_error.md
+エラー修正フェーズで使用。テスト失敗時のコード修正：
+- 前回の実装内容
+- エラー詳細
+- 修正ガイドライン
+
+### エスカレーションロジック
 
 ```yaml
-# projects/my-project/project.yaml
-project: my-project
-name: マイプロジェクト
-description: プロジェクトの説明
-
-# 役割とLLMの割り当て
-role_assignments:
-  pm: gemini
-  architect: claude
-  implementer: lfm
-  reviewer: claude
-  qa: gemini
-
-# ワークフロー定義
-workflow:
-  - step: 1
-    role: pm
-    action: 要件分析
-  - step: 2
-    role: architect
-    action: 設計
-  # ...
+escalation:
+  minor_errors:    # LFMで自動修正を試みる
+    - syntax_error
+    - import_error
+    - type_error
+    - name_error
+  complex_errors:  # Claude/Geminiにエスカレーション
+    - logic_error
+    - design_mismatch
+    - test_ambiguity
+    - runtime_error
 ```
 
-## 役割割り当ての比較
+## 今後の拡張予定
 
-異なる役割割り当てによる品質の違いを比較できます。
+- **Phase 2**: テスト自動実行、結果に基づく分岐
+- **Phase 3**: 再試行・エスカレーションロジックの実装
+- **Phase 4**: 複数言語対応、CI/CD統合
+- **Phase 5**: Web UI、リアルタイム進捗表示
 
-### パターン一覧
+## テスト実行設定
 
-| パターン | 設定ファイル | LFMの役割 | 検証目的 |
-|---------|-------------|----------|---------|
-| A（デフォルト） | `project.yaml` | Implementer | 基本構成 |
-| B（代替） | `project-alt.yaml` | Implementer | Claude/Gemini入れ替え |
-| C（LFM PM） | `project-lfm-pm.yaml` | PM | LFMの要件分析能力 |
-| D（LFM Architect） | `project-lfm-architect.yaml` | Architect | LFMの設計能力 |
-
-### パターンA（デフォルト）- LFM Implementer
-| 役割 | LLM |
-|-----|-----|
-| PM | Gemini |
-| Architect | Claude |
-| Implementer | **LFM** |
-| Reviewer | Claude |
-| QA | Gemini |
-
-### パターンB（代替）- LFM Implementer
-| 役割 | LLM |
-|-----|-----|
-| PM | Claude |
-| Architect | Gemini |
-| Implementer | **LFM** |
-| Reviewer | Gemini |
-| QA | Claude |
-
-### パターンC - LFM PM
-| 役割 | LLM |
-|-----|-----|
-| PM | **LFM** |
-| Architect | Claude |
-| Implementer | Gemini |
-| Reviewer | Claude |
-| QA | Gemini |
-
-### パターンD - LFM Architect
-| 役割 | LLM |
-|-----|-----|
-| PM | Gemini |
-| Architect | **LFM** |
-| Implementer | Claude |
-| Reviewer | Gemini |
-| QA | Claude |
-
-## モデルバリエーション
-
-### LFM モデル
-
-| モデル | サイズ | 用途 |
-|-------|-------|------|
-| LFM2.5-1.2B-Instruct-Q4_K_M.gguf | ~700MB | 標準（推奨） |
-| LFM2.5-1.2B-Instruct-Q8_0.gguf | ~1.25GB | 高精度 |
-| LFM2.5-1.2B-Instruct-F16.gguf | ~2.34GB | フル精度 |
-| LFM2.5-1.2B-JP-Instruct-Q4_K_M.gguf | ~700MB | 日本語特化 |
-| LFM2.5-3B-Instruct-Q4_K_M.gguf | - | 大規模モデル |
+```yaml
+testing:
+  timeout: 60
+  languages:
+    python:
+      test_command: pytest -v
+      setup_command: pip install -r requirements.txt
+    javascript:
+      test_command: npm test
+      setup_command: npm install
+    typescript:
+      test_command: npm test
+      setup_command: npm install
+```
 
 ## ライセンス
 
-MIT License
+MIT

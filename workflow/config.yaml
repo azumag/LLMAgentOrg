@@ -1,0 +1,52 @@
+workflow:
+  name: opus-lfm-pipeline
+  description: Opus設計 → LFM実装 → テスト → レビュー
+
+llm_assignments:
+  design: claude      # Opus for design
+  implement: lfm      # LFM for implementation
+  review: claude      # Opus or Gemini for review
+
+retry:
+  max_attempts: 3
+  escalation_threshold: 2
+
+lfm:
+  server_url: http://localhost:8080
+  model: LFM2.5-1.2B-Instruct
+  temperature: 0.7
+  max_tokens: 4096
+  timeout: 120
+
+claude:
+  cli_command: claude
+  timeout: 300
+
+gemini:
+  cli_command: gemini
+  timeout: 300
+
+testing:
+  timeout: 60
+  languages:
+    python:
+      test_command: pytest -v
+      setup_command: pip install -r requirements.txt
+    javascript:
+      test_command: npm test
+      setup_command: npm install
+    typescript:
+      test_command: npm test
+      setup_command: npm install
+
+escalation:
+  minor_errors:
+    - syntax_error
+    - import_error
+    - type_error
+    - name_error
+  complex_errors:
+    - logic_error
+    - design_mismatch
+    - test_ambiguity
+    - runtime_error
