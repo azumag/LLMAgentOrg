@@ -18,6 +18,7 @@ Opus -> LFM -> テスト -> レビュー の自動化ワークフロー：
 | Claude (Opus) | 高い推論能力、正確なコード生成 | 設計、レビュー、QA |
 | Gemini | 大規模コンテキスト、高速 | PM、要件分析、ドキュメント |
 | LFM | 無料、ローカル実行、高速 | コード実装（何度でも再生成可能） |
+| OpenCode | ファイル操作、コード編集、Git統合 | 実装、コードベース分析、自動化 |
 
 ## ディレクトリ構成
 
@@ -29,7 +30,8 @@ LLMAgentOrg/
 │   ├── llms/              # LLM設定
 │   │   ├── claude.yaml    # Claude (Anthropic) 設定
 │   │   ├── gemini.yaml    # Gemini (Google) 設定
-│   │   └── lfm.yaml       # LFM (Liquid AI) 設定
+│   │   ├── lfm.yaml       # LFM (Liquid AI) 設定
+│   │   └── opencode.yaml  # OpenCode 設定
 │   └── roles/             # 役割定義
 │       ├── pm.yaml        # プロジェクトマネージャー
 │       ├── architect.yaml # アーキテクト
@@ -122,6 +124,16 @@ huggingface-cli download LiquidAI/LFM2.5-1.2B-Instruct-GGUF \
 ./build/bin/llama-server -m ./models/LFM2.5-1.2B-Instruct-Q4_K_M.gguf --port 8080
 ```
 
+### OpenCode のセットアップ
+
+```bash
+# インストール
+npm install -g @opencode-ai/opencode
+
+# 認証（必要な場合）
+opencode auth login
+```
+
 利用可能なLFMモデル：
 - `LFM2.5-1.2B-Instruct` - 英語版（推奨）
 - `LFM2.5-1.2B-JP-Instruct` - 日本語版
@@ -177,6 +189,9 @@ huggingface-cli download LiquidAI/LFM2.5-1.2B-Instruct-GGUF \
 
 # LFM を呼び出し（llama-serverが起動している必要あり）
 ./workflow/bin/invoke-llm.sh lfm prompt.txt output.txt
+
+# OpenCode を呼び出し
+./workflow/bin/invoke-llm.sh opencode prompt.txt output.txt
 
 # タイムアウトを指定（デフォルト: 300秒）
 ./workflow/bin/invoke-llm.sh claude prompt.txt output.txt --timeout=600
@@ -259,6 +274,17 @@ performance:
   generation: "117 t/s"
 ```
 
+#### OpenCode (opencode.yaml)
+```yaml
+llm: opencode
+models:
+  - opencode-default
+default_model: opencode-default
+invocation:
+  type: cli
+  cli: opencode
+```
+
 ### 役割定義 (config/roles/)
 
 | 役割 | 説明 | 主な責務 |
@@ -278,7 +304,8 @@ performance:
 role_assignments:
   pm: gemini           # Gemini が PM
   architect: claude    # Claude がアーキテクト
-  implementer: lfm     # LFM が実装
+  implementer: opencode  # OpenCode が実装
+  implementer_assistant: lfm  # LFM が実装補助
   reviewer: claude     # Claude がレビュー
   qa: gemini           # Gemini が QA
 ```
@@ -288,7 +315,8 @@ role_assignments:
 role_assignments:
   pm: claude           # Claude が PM
   architect: gemini    # Gemini がアーキテクト
-  implementer: lfm     # LFM が実装
+  implementer: opencode  # OpenCode が実装
+  implementer_assistant: lfm  # LFM が実装補助
   reviewer: gemini     # Gemini がレビュー
   qa: claude           # Claude が QA
 ```

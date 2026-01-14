@@ -9,7 +9,8 @@ description: |
 role_assignments:
   pm: lfm              # LFM（ローカル）が PM を担当
   architect: claude    # Claude がアーキテクトを担当
-  implementer: gemini  # Gemini が実装を担当
+  implementer: opencode  # OpenCode が実装を担当
+  implementer_assistant: gemini  # Gemini が実装補助を担当
   reviewer: claude     # Claude がレビューを担当
   qa: gemini           # Gemini が QA を担当
 

@@ -1,0 +1,31 @@
+# OpenCode LLM Definition
+llm: opencode
+name: OpenCode
+provider: opencode-ai
+
+models:
+  - opencode-default
+
+default_model: opencode-default
+
+characteristics:
+  strengths:
+    - ファイル操作機能
+    - コード編集・生成
+    - コードベース探索
+    - Git操作統合
+    - Web検索・取得
+  suitable_for:
+    - コード実装
+    - コードリファクタリング
+    - ファイル操作
+    - コードベース分析
+    - 自動化タスク
+
+invocation:
+  type: cli
+  cli: opencode
+
+setup:
+  # インストール: npm install -g @opencode-ai/opencode
+  # 詳細: https://opencode.ai
