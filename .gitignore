@@ -1,0 +1,25 @@
+# Local LLM (symlinks to llama.cpp)
+local-llm/build
+local-llm/models
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/

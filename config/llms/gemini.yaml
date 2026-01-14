@@ -1,0 +1,34 @@
+# Gemini LLM Definition
+llm: gemini
+name: Google Gemini
+provider: google
+
+models:
+  - gemini-2.5-pro
+  - gemini-2.5-flash
+
+default_model: gemini-2.5-pro
+
+characteristics:
+  strengths:
+    - 大規模なコンテキストウィンドウ
+    - マルチモーダル対応
+    - 高速なレスポンス
+    - コスト効率が良い
+  suitable_for:
+    - 要件分析
+    - ドキュメント生成
+    - 大量のコード分析
+    - プロジェクト管理タスク
+
+api:
+  type: google-ai
+  # 環境変数 GOOGLE_API_KEY を使用
+
+invocation:
+  # gemini-cli経由での呼び出し
+  cli: gemini
+  mcp_tools:
+    - mcp__gemini-cli__chat
+    - mcp__gemini-cli__googleSearch
+    - mcp__gemini-cli__analyzeFile

@@ -1,0 +1,56 @@
+# LFM (Liquid Foundation Models) LLM Definition
+llm: lfm
+name: Liquid Foundation Models
+provider: liquid-ai
+
+homepage: https://www.liquid.ai/blog/liquid-foundation-models-v2-our-second-series-of-generative-ai-models
+huggingface: https://huggingface.co/collections/LiquidAI/lfm25
+
+models:
+  - LFM2.5-1.2B-Instruct      # 英語版
+  - LFM2.5-1.2B-JP-Instruct   # 日本語版
+  - LFM2.5-3B-Instruct        # 大きいモデル
+
+default_model: LFM2.5-1.2B-Instruct
+
+quantization_options:
+  - Q4_K_M    # 推奨（バランス良い）
+  - Q8_0     # 高精度
+  - F16      # フル精度
+
+characteristics:
+  strengths:
+    - ローカル実行（プライバシー保護）
+    - 高速推論（Apple Metal対応）
+    - コスト無料
+    - オフライン利用可能
+  limitations:
+    - コンテキストウィンドウが小さい
+    - 複雑な推論は苦手
+    - 大規模コードベースの分析は困難
+  suitable_for:
+    - シンプルなコード実装
+    - 定型的なタスク
+    - ドキュメント生成
+    - 軽量なコード補完
+
+runtime:
+  engine: llama.cpp
+  repository: https://github.com/ggml-org/llama.cpp
+
+invocation:
+  # インタラクティブモード
+  cli: |
+    ./local-llm/build/bin/llama-cli -m ./local-llm/models/LFM2.5-1.2B-Instruct-Q4_K_M.gguf
+
+  # サーバーモード（API）
+  server: |
+    ./local-llm/build/bin/llama-server -m ./local-llm/models/LFM2.5-1.2B-Instruct-Q4_K_M.gguf --port 8080
+
+  # API endpoint（サーバー起動後）
+  api_endpoint: http://localhost:8080/v1/chat/completions
+
+performance:
+  # Apple M4での参考値
+  prompt_eval: "156 t/s"
+  generation: "117 t/s"

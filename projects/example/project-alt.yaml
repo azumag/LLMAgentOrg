@@ -1,0 +1,75 @@
+# Alternative Project Configuration (for comparison)
+project: example-alt
+name: サンプルプロジェクト（代替構成）
+description: |
+  役割割り当てを変えた代替構成。
+  品質比較のために使用。
+
+# 代替の役割割り当て
+role_assignments:
+  pm: claude           # Claude が PM を担当
+  architect: gemini    # Gemini がアーキテクトを担当
+  implementer: lfm     # LFM（ローカル）が実装を担当
+  reviewer: gemini     # Gemini がレビューを担当
+  qa: claude           # Claude が QA を担当
+
+# ワークフロー定義
+workflow:
+  - step: 1
+    role: pm
+    action: 要件分析
+    description: ユーザーの要件を分析し、タスクに分解する
+
+  - step: 2
+    role: architect
+    action: 設計
+    description: PMからの要件を受けて、システム設計を行う
+
+  - step: 3
+    role: implementer
+    action: 実装
+    description: アーキテクトの設計に従ってコードを実装する
+
+  - step: 4
+    role: reviewer
+    action: コードレビュー
+    description: 実装されたコードをレビューする
+
+  - step: 5
+    role: implementer
+    action: レビュー指摘修正
+    description: レビュー指摘を反映する
+    condition: レビューで要修正の場合
+
+  - step: 6
+    role: qa
+    action: 結合テスト・E2Eテスト
+    description: 結合テストとE2Eテストを設計・実行する
+
+  - step: 7
+    role: implementer
+    action: バグ修正
+    description: QAで発見されたバグを修正する
+    condition: バグが発見された場合
+
+  - step: 8
+    role: qa
+    action: リリース判定
+    description: 受入基準に基づいた最終確認とリリース判定
+    output: GO/NO-GO判定
+
+# 評価基準（品質比較用）
+evaluation:
+  metrics:
+    - name: 完了率
+      description: タスクの完了率
+    - name: コード品質
+      description: レビュー指摘の数と深刻度
+    - name: バグ発見数
+      description: QAで発見されたバグの数
+    - name: 設計の一貫性
+      description: 設計仕様と実装の整合性
+    - name: 実行時間
+      description: 各ステップにかかった時間
+    - name: リリース成功率
+      description: QA判定がGOになった率

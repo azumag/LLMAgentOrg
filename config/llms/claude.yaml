@@ -1,0 +1,32 @@
+# Claude LLM Definition
+llm: claude
+name: Anthropic Claude
+provider: anthropic
+
+models:
+  - claude-opus-4-5
+  - claude-sonnet-4
+  - claude-haiku-3-5
+
+default_model: claude-sonnet-4
+
+characteristics:
+  strengths:
+    - 高い推論能力
+    - 正確なコード生成
+    - 安全性への配慮
+    - 長文の一貫性
+  suitable_for:
+    - アーキテクチャ設計
+    - 複雑なコード実装
+    - コードレビュー
+    - 技術的な意思決定
+
+api:
+  type: anthropic-api
+  # 環境変数 ANTHROPIC_API_KEY を使用
+
+invocation:
+  # Claude Code CLI経由での呼び出し
+  cli: claude
+  # またはAPI直接呼び出し
