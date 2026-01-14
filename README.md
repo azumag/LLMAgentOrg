@@ -214,21 +214,48 @@ workflow:
 
 異なる役割割り当てによる品質の違いを比較できます。
 
-### パターンA（デフォルト）
+### パターン一覧
+
+| パターン | 設定ファイル | LFMの役割 | 検証目的 |
+|---------|-------------|----------|---------|
+| A（デフォルト） | `project.yaml` | Implementer | 基本構成 |
+| B（代替） | `project-alt.yaml` | Implementer | Claude/Gemini入れ替え |
+| C（LFM PM） | `project-lfm-pm.yaml` | PM | LFMの要件分析能力 |
+| D（LFM Architect） | `project-lfm-architect.yaml` | Architect | LFMの設計能力 |
+
+### パターンA（デフォルト）- LFM Implementer
 | 役割 | LLM |
 |-----|-----|
 | PM | Gemini |
 | Architect | Claude |
-| Implementer | LFM |
+| Implementer | **LFM** |
 | Reviewer | Claude |
 | QA | Gemini |
 
-### パターンB（代替）
+### パターンB（代替）- LFM Implementer
 | 役割 | LLM |
 |-----|-----|
 | PM | Claude |
 | Architect | Gemini |
-| Implementer | LFM |
+| Implementer | **LFM** |
+| Reviewer | Gemini |
+| QA | Claude |
+
+### パターンC - LFM PM
+| 役割 | LLM |
+|-----|-----|
+| PM | **LFM** |
+| Architect | Claude |
+| Implementer | Gemini |
+| Reviewer | Claude |
+| QA | Gemini |
+
+### パターンD - LFM Architect
+| 役割 | LLM |
+|-----|-----|
+| PM | Gemini |
+| Architect | **LFM** |
+| Implementer | Claude |
 | Reviewer | Gemini |
 | QA | Claude |
 
