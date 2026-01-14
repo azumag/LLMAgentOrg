@@ -21,14 +21,16 @@ characteristics:
     - 大量のコード分析
     - プロジェクト管理タスク
 
-api:
-  type: google-ai
-  # 環境変数 GOOGLE_API_KEY を使用
-
 invocation:
-  # gemini-cli経由での呼び出し
+  type: cli
+  # gemini-cli経由での呼び出し（Google One AI Premium サブスク必要）
   cli: gemini
   mcp_tools:
     - mcp__gemini-cli__chat
     - mcp__gemini-cli__googleSearch
     - mcp__gemini-cli__analyzeFile
+
+setup:
+  # インストール: npm install -g @google/gemini-cli
+  # 認証: gemini auth login（Googleアカウントでログイン）
+  # 必要: Google One AI Premium サブスクリプション

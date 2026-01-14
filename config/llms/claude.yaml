@@ -22,11 +22,12 @@ characteristics:
     - コードレビュー
     - 技術的な意思決定
 
-api:
-  type: anthropic-api
-  # 環境変数 ANTHROPIC_API_KEY を使用
-
 invocation:
-  # Claude Code CLI経由での呼び出し
+  type: cli
+  # Claude Code CLI経由での呼び出し（Claude Pro/Max サブスク必要）
   cli: claude
-  # またはAPI直接呼び出し
+
+setup:
+  # インストール: npm install -g @anthropic-ai/claude-code
+  # 認証: claude auth login（Anthropicアカウントでログイン）
+  # 必要: Claude Pro または Claude Max サブスクリプション

@@ -55,11 +55,11 @@ LLMが協調して動作する組織の実験的プロジェクト。
 
 ## 利用可能なLLM
 
-| LLM | プロバイダー | 特徴 | 設定ファイル |
-|-----|------------|------|-------------|
-| Gemini | Google | 大規模コンテキスト、高速 | `config/llms/gemini.yaml` |
-| Claude | Anthropic | 高い推論能力、正確なコード生成 | `config/llms/claude.yaml` |
-| LFM | Liquid AI (ローカル) | プライバシー保護、コスト無料 | `config/llms/lfm.yaml` |
+| LLM | プロバイダー | 呼び出し方式 | 必要なサブスク | 設定ファイル |
+|-----|------------|-------------|--------------|-------------|
+| Gemini | Google | gemini-cli | Google One AI Premium | `config/llms/gemini.yaml` |
+| Claude | Anthropic | claude-code | Claude Pro/Max | `config/llms/claude.yaml` |
+| LFM | Liquid AI | llama.cpp (ローカル) | なし（無料） | `config/llms/lfm.yaml` |
 
 ### ローカルLLM（LFM）について
 
@@ -157,15 +157,29 @@ ln -s /path/to/llama.cpp/models local-llm/models
 - Prompt評価: 156 tokens/s
 - 生成: 117 tokens/s
 
-### 4. API キーの設定
+### 4. Gemini CLI のセットアップ
 
 ```bash
-# Gemini API
-export GOOGLE_API_KEY="your-google-api-key"
+# インストール
+npm install -g @google/gemini-cli
 
-# Claude API
-export ANTHROPIC_API_KEY="your-anthropic-api-key"
+# 認証（Googleアカウントでログイン）
+gemini auth login
 ```
+
+**必要**: Google One AI Premium サブスクリプション
+
+### 5. Claude Code CLI のセットアップ
+
+```bash
+# インストール
+npm install -g @anthropic-ai/claude-code
+
+# 認証（Anthropicアカウントでログイン）
+claude auth login
+```
+
+**必要**: Claude Pro または Claude Max サブスクリプション
 
 ## プロジェクト設定の作成
 
